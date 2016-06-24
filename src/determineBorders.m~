@@ -1,0 +1,53 @@
+function BorderChild = determineBorders(ParentBorders)
+xmin = ParentBorders(1);
+ymin = ParentBorders(2);
+zmin = ParentBorders(3);
+xmax = ParentBorders(4);
+ymax = ParentBorders(5);
+zmax = ParentBorders(6);
+BorderChild = [0,0,0,0,0,0;0,0,0,0,0,0;0,0,0,0,0,0;0,0,0,0,0,0;0,0,0,0,0,0;0,0,0,0,0,0;0,0,0,0,0,0;0,0,0,0,0,0]
+% for h = 1:3:size(xyzKey, 2)
+%     if  strcmp('000', xyzKey(h:h+2))
+%         xmax = (xmax+xmin)/2;
+%         ymax = (ymax+ymin)/2;
+%         zmax = (zmax+zmin)/2;
+%     elseif  strcmp('001', xyzKey(h:h+2))
+%         xmax = (xmax+xmin)/2;
+%         ymax = (ymax+ymin)/2;
+%         zmin = (zmax+zmin)/2;
+%     elseif  strcmp('010', xyzKey(h:h+2))
+%         xmax = (xmax+xmin)/2;
+%         ymin = (ymax+ymin)/2;
+%         zmax = (zmax+zmin)/2;
+%     elseif  strcmp('011', xyzKey(h:h+2))
+%         xmax = (xmax+xmin)/2;
+%         ymin = (ymax+ymin)/2;
+%         zmin = (zmax+zmin)/2;
+%     elseif  strcmp('100', xyzKey(h:h+2))
+%         xmin = (xmax+xmin)/2;
+%         ymax = (ymax+ymin)/2;
+%         zmax = (zmax+zmin)/2;
+%     elseif  strcmp('101', xyzKey(h:h+2))
+%         xmin = (xmax+xmin)/2;
+%         ymax = (ymax+ymin)/2;
+%         zmin = (zmax+zmin)/2;
+%     elseif  strcmp('110', xyzKey(h:h+2))
+%         xmin = (xmax+xmin)/2;
+%         ymin = (ymax+ymin)/2;
+%         zmax = (zmax+zmin)/2;
+%     elseif  strcmp('111', xyzKey(h:h+2))
+%         xmin = (xmax+xmin)/2;
+%         ymin = (ymax+ymin)/2;
+%         zmin = (zmax+zmin)/2;
+%     end
+% end % for
+BorderChild(1,:) = [xmin, ymin, zmin, (xmax+xmin)/2, (ymax+ymin)/2, (zmax+zmin)/2];
+BorderChild(2,:) = [xmin, ymin, (zmax+zmin)/2, (xmax+xmin)/2, (ymax+ymin)/2, zmax];
+BorderChild(3,:) = [xmin, (ymax+ymin)/2, zmin, (xmax+xmin)/2, ymax, (zmax+zmin)/2];
+BorderChild(4,:) = [xmin, (ymax+ymin)/2, (zmax+zmin)/2, (xmax+xmin)/2, ymax, zmax];
+BorderChild(5,:) = [(xmax+xmin)/2, ymin, zmin, xmax, (ymax+ymin)/2, (zmax+zmin)/2];
+BorderChild(6,:) = [(xmax+xmin)/2, ymin, (zmax+zmin)/2, xmax, (ymax+ymin)/2, zmax];
+BorderChild(7,:) = [(xmax+xmin)/2, (ymax+ymin)/2, zmin, xmax, ymax, (zmax+zmin)/2];
+BorderChild(8,:) = [(xmax+xmin)/2, (ymax+ymin)/2, (zmax+zmin)/2, xmax, ymax, zmax];
+
+end % function

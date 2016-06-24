@@ -1,0 +1,126 @@
+classdef octree < handle
+    %OCTREE is the class for the whole octree representation.
+    %   Detailed explanation goes here
+    
+    properties
+        head; %
+        tail; %
+        oct; % array for storing the nodes
+        L; % the depth of the octree, and the root level is 0
+        T; % the number of levels in the top layer
+        B; % depth of the branch layer
+        borders; % borders of the initial cube
+        needSplitNextLevel = false; % evaluates if recursion should stop
+        
+        
+    end
+    
+    methods
+        function this = octree(points)
+            % control of the consigned values: vector with 3 columns
+            validateattributes(points,{'numeric'},{'real','finite','nonnan','ncols', 3})
+            
+            % Initialise the root node containing all given points
+            this.L = 2;
+            this.T = 1;
+            this.B = 1;
+            this.borders = [min(points,[],1) max(points,[],1)]; % vector xmin ymin zmin xmax ymax zmax
+            this.oct{1,1} = topNode(0,1); % top layer
+            this.oct{2,1} = octreeNode(points, '',this.borders); % branch layer
+            this.tail(1) = 1;
+            this.tail(2) = 1;
+            %             for k = 2:4
+            splitNodeAtLevelL(this, 2);
+            %             end
+        end
+        
+        function splitNodeAtLevelL(this, l)
+            l
+            this.L = this.L + 1;
+            parent = this.oct;
+            
+            % proves all nodes at leven l if they need a split
+            splitVec = needSplit(this, l);
+            %allocate space
+            if splitVec(end) > 0 % node need split
+                this.oct{l+1,(splitVec(end)*8)} = [];
+            end
+            
+            parentBorders = this.borders;
+            ChildIDs = zeros(size(splitVec,1),1);
+            
+            t = size(splitVec,1);
+            childNodes = [octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[])]; %cell(size(splitVec,1),8);
+            for j = 1:t
+                childNodes(j,:) = childNodes(1,:);
+            end
+            for i = 1:size(splitVec,1) % goes trough all nodes in parallel
+                if splitVec(i) > 0 % node need split
+                    
+                    %% calculate the borders of the child nodes
+%                     ending = ['000';'001';'010';'011';'100';'101';'110';'111'];
+%                     BorderChild = zeros(8,6);
+%                     for o = 1:8;
+%                         BorderChild(o,:) = determineBorders([parent{l,i}.xyzKey ending(o,:)], parentBorders);           
+%                     end % for
+                    BorderChild = determineBorders(this.oct{l,i}. parent{l,i}.xyzKey, [ ending(1);...
+                        parent{l,i}.xyzKey ending(2);...
+                        parent{l,i}.xyzKey ending(3);...
+                        parent{l,i}.xyzKey ending(4);...
+                        parent{l,i}.xyzKey ending(5);...
+                        parent{l,i}.xyzKey ending(6);...
+                        parent{l,i}.xyzKey ending(7);...
+                        parent{l,i}.xyzKey ending(8)], parentBorders);
+                  
+                    %% controll and view the borders of the child nodes
+%                     plotOctree(parentBorders, BorderChild);
+                    
+                    %% determine which point is in which child octant
+                    [points_000, points_001, points_010, points_011, points_100, points_101, points_110, points_111] = sortPointsToChilds(parent{l,i}.points, BorderChild);
+                    
+                    
+                    %% save the eight child nodes                    
+                    ChildIDs(i) = (splitVec(i)-1) * 8 + 1; % childID of the first child is set for current node
+                    temp = [octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[]) octreeNode([],'',[])];
+                    temp(1) = octreeNode(points_000, [parent{l,i}.xyzKey '000'], BorderChild(1,:));
+                    temp(2) = octreeNode(points_001, [parent{l,i}.xyzKey '001'], BorderChild(2,:));
+                    temp(3) = octreeNode(points_010, [parent{l,i}.xyzKey '010'], BorderChild(3,:));
+                    temp(4) = octreeNode(points_011, [parent{l,i}.xyzKey '011'], BorderChild(4,:));
+                    temp(5) = octreeNode(points_100, [parent{l,i}.xyzKey '100'], BorderChild(5,:));
+                    temp(6) = octreeNode(points_101, [parent{l,i}.xyzKey '101'], BorderChild(6,:));
+                    temp(7) = octreeNode(points_110, [parent{l,i}.xyzKey '110'], BorderChild(7,:));
+                    temp(8) = octreeNode(points_111, [parent{l,i}.xyzKey '111'], BorderChild(8,:));
+                    childNodes(i,:) = temp;
+                end %if
+            end %parfor
+            
+            counterChildNodes = 0;
+            for i = 1:size(splitVec,1)
+                if splitVec(i) ~= 0
+                    this.oct{l+1,counterChildNodes + 1} = childNodes(i,1);
+                    this.oct{l+1,counterChildNodes + 2} = childNodes(i,2);
+                    this.oct{l+1,counterChildNodes + 3} = childNodes(i,3);
+                    this.oct{l+1,counterChildNodes + 4} = childNodes(i,4);
+                    this.oct{l+1,counterChildNodes + 5} = childNodes(i,5);
+                    this.oct{l+1,counterChildNodes + 6} = childNodes(i,6);
+                    this.oct{l+1,counterChildNodes + 7} = childNodes(i,7);
+                    this.oct{l+1,counterChildNodes + 8} = childNodes(i,8);
+                    this.oct{l,i}.childID = ChildIDs(i);
+                    this.oct{l,i}.points = [];
+                    counterChildNodes = counterChildNodes + 8;                    
+                end %if
+
+            end %for
+            
+            
+            this.tail(l+1) = max(splitVec) * 8;
+            
+            if this.needSplitNextLevel %&& (l <= 5)
+                this.needSplitNextLevel = false;
+                l = l + 1;
+                splitNodeAtLevelL(this, l);
+            end %if
+        end % function
+    end % methods
+end
+
