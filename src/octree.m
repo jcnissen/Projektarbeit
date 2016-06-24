@@ -46,7 +46,6 @@ classdef octree < handle
                 this.oct{l+1,(splitVec(end)*8)} = [];
             end
             
-            parentBorders = this.borders;
             ChildIDs = zeros(size(splitVec,1),1);
             
             t = size(splitVec,1);
